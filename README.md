@@ -47,7 +47,9 @@ go run main.go
 
 The API will be running on `http://localhost:8080`.
 
-## Endpoints
+Note: this is simply a barebones test version. Future versions will operate differently.
+
+## Current Endpoints
 
 - **GET** `/secrets`: Retrieve a list of all secrets.
 - **POST** `/secrets`: Add a new secret. Requires a JSON body with `SecretId`, `SecretName`, `Secret`, and `SecretPW`.
@@ -58,16 +60,6 @@ The API will be running on `http://localhost:8080`.
 The upcoming frontend will feature:
 
 - A table of secret IDs and Names with a "reveal secret" button.
-- A "add secret" button to input and add a new secret.
+- An "add secret" button to input and add a new secret.
+- Eventually move to React-based frontend. 
 
-## Contributing
-
-Contributions are welcome! Please read our contributing guidelines to get started.
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-This is a basic structure. You might want to adjust the details based on the specifics of your project. If there's any more information you'd like to include or if there are more specific details about the project that you'd like to highlight, please let me know!
