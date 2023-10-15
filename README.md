@@ -6,17 +6,19 @@ A simple RESTful API built with Go and the Gin framework to manage and store sec
 
 ## Features
 
-- **List All Secrets**: Retrieve a list of all secrets with their names and IDs.
-- **Add a Secret**: Submit a new secret, its name, and associated password.
-- **Retrieve a Secret by ID**: Provide a secret ID to retrieve the associated secret details.
+- **List All Secrets**: Display a list of all secrets with their names and IDs on the frontend.
+- **Add a Secret**: A button prompts users to input a new secret, its name, and an associated password.
+- **Reveal a Secret**: Click a button to provide the password for a specific secret and view its contents.
+- **Backend Password Verification**: Provide a password to retrieve the associated secret details. If incorrect, an error message will be shown.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Go (version 1.21 or later)
-- Gin framework
-
+- [Go](https://golang.org/dl/) (version 1.21 or later)
+- [Gin framework](https://github.com/gin-gonic/gin)
+- A modern web browser
+- 
 ### Installation
 
 1. Clone the repository:
@@ -36,6 +38,7 @@ cd [your-directory-name]
 ```bash
 go get -u
 ```
+4. To start the frontend, you might need to host it using a static server or integrate it into your development environment based on your project setup. The easiest way would be to use a simple HTTP server or through extensions available on code editors (like Live Server for VS Code).
 
 ### Running the Application
 
@@ -53,13 +56,17 @@ Note: this is simply a barebones test version. Future versions will operate diff
 
 - **GET** `/secrets`: Retrieve a list of all secrets.
 - **POST** `/secrets`: Add a new secret. Requires a JSON body with `SecretId`, `SecretName`, `Secret`, and `SecretPW`.
-- **GET** `/secrets/:secretId`: Retrieve a specific secret by its ID.
+- **GET** `/secrets/:secretId:` Extract a secret's name by id without password verification (will be removed in final version)
+- POST `/secrets/:secretId:` Fetch a specific secret by its ID after verifying the provided password.
 
-## Frontend (Coming Soon)
-
-The upcoming frontend will feature:
+## Frontend 
 
 - A table of secret IDs and Names with a "reveal secret" button.
 - An "add secret" button to input and add a new secret.
-- Eventually move to React-based frontend. 
+
+##  TO DO LIST: 
+- Eventually move to React-based frontend
+- Integrate with database instead of using in-memory slices
+- Implement AES instead of storing passwords directly
+- Add user accounts and authentication
 
