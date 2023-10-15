@@ -1,0 +1,19 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+button {
+    margin-top: 20px;
+}
+
+/* Green */
+body {
+    background-color: #4CAF50;
+}

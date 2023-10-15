@@ -4,16 +4,21 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// Set the router as the default one shipped with Gin and apply the CORS middleware to the router.
 	router := gin.Default()
-	router.GET("/secrets", getSecrets)
+	router.Use(SetupCORS())
+
 	router.GET("/secrets", getSecrets)
 	router.GET("/secrets/:secretId", getSecretByID)
 	router.POST("/secrets", postSecrets)
-	router.Run("localhost:8080")
+	router.POST("/secrets/:secretId", verifySecret)
+
+	router.Run(":8080")
 }
 
 type secret struct {
@@ -29,60 +34,90 @@ var secrets = []secret{
 	{SecretId: 3, SecretName: "Secret three", Secret: "Hiii", SecretPW: "12345a"},
 }
 
-// getSecrets responds with a list of all secrets as JSON
 func getSecrets(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, secrets)
 }
 
-// postSecrets adds a secret from JSON received in the request body
 func postSecrets(c *gin.Context) {
 	var newSecret secret
 
-	// Call BindJSON to bind the received JSON to newSecret
 	if err := c.BindJSON(&newSecret); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed binding JSON", "details": err.Error()})
 		return
 	}
 
-	// Add the new secret to the slice.
+	// Automatically assign an ID to the new secret
+	newSecret.SecretId = len(secrets) + 1
 	secrets = append(secrets, newSecret)
 	c.IndentedJSON(http.StatusCreated, newSecret)
 }
 
-func getSecretByName(c *gin.Context) {
-	// Get secret name from the URL
-	name := c.Param("secretName")
-
-	// Loop over the list of secrets, look for
-	for _, a := range secrets {
-		if a.SecretName == name {
-			c.IndentedJSON(http.StatusOK, a)
-			return
-		}
-	}
-}
-
-// getSecretsByID locates the secret whose ID matches the id parameter sent by the client
-// then returns that secret as a response.
 func getSecretByID(c *gin.Context) {
-	// Get id from the URL
 	secretIdStr := c.Param("secretId")
 	ID, err := strconv.Atoi(secretIdStr)
 
-	// Verify that the id is valid
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid secret ID"})
 		return
 	}
 
-	// Loop over the list of secrets, look for
-	// an secret with a matching id.
 	for _, a := range secrets {
 		if a.SecretId == ID {
 			c.IndentedJSON(http.StatusOK, a)
 			return
 		}
 	}
-	// If no secret with the id is found, return
+
 	c.JSON(http.StatusNotFound, gin.H{"error": "Secret not found"})
+}
+
+func verifySecret(c *gin.Context) {
+	// Extract the secretId from the URL
+	secretIdStr := c.Param("secretId")
+	ID, err := strconv.Atoi(secretIdStr)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid secret ID"})
+		return
+	}
+
+	// Define a struct to parse the JSON request body into
+	var requestBody struct {
+		SecretPassword string `json:"secretPassword"`
+	}
+
+	// Parse the incoming JSON request body into the defined struct
+	if err := c.BindJSON(&requestBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed binding JSON"})
+		return
+	}
+
+	// Iterate over the secrets to find the one with the matching ID
+	for _, a := range secrets {
+		if a.SecretId == ID {
+			// If the provided password matches the secret's password, return the secret
+			if a.SecretPW == requestBody.SecretPassword {
+				c.JSON(http.StatusOK, gin.H{"Secret": a.Secret})
+				return
+			} else {
+				// If passwords don't match, send an Unauthorized response
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
+				return
+			}
+		}
+	}
+
+	// If no matching secret is found, send a Not Found response
+	c.JSON(http.StatusNotFound, gin.H{"error": "Secret not found"})
+}
+
+// SetupCORS configures and returns a CORS middleware.
+func SetupCORS() gin.HandlerFunc {
+	return cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	})
 }

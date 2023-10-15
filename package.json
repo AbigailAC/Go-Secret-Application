@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@types/axios": "^0.14.0"
+  },
+  "dependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
